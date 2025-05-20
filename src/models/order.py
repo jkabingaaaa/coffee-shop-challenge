@@ -1,51 +1,26 @@
-from __future__ import annotations
-from typing import List, ClassVar, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from customer import Customer
-    from coffee import Coffee
-
-class Order:
-    all: ClassVar[List[Order]] = []
-    
-    def __init__(self, customer: Customer, coffee: Coffee, price: float):
-        self.customer = customer
-        self.coffee = coffee
-        self.price = price
-        Order.all.append(self)
+class Customer:
+    def __init__(self, name):
+        self.name = name
     
     @property
-    def customer(self) -> Customer:
-        return self._customer
+    def name(self):
+        return self._name
     
-    @customer.setter
-    def customer(self, value: Customer):
-        from customer import Customer
-        if not isinstance(value, Customer):
-            raise TypeError("Customer must be an instance of Customer class")
-        self._customer = value
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Name must be a string")
+        if not 1 <= len(value) <= 15:
+            raise ValueError("Name must be between 1 and 15 characters")
+        self._name = value
     
-    @property
-    def coffee(self) -> Coffee:
-        return self._coffee
+    def orders(self):
+        from order import Order  # Local import
+        return [order for order in Order.all if order.customer == self]
     
-    @coffee.setter
-    def coffee(self, value: Coffee):
-        from coffee import Coffee
-        if not isinstance(value, Coffee):
-            raise TypeError("Coffee must be an instance of Coffee class")
-        self._coffee = value
+    def coffees(self):
+        return list({order.coffee for order in self.orders()})  # No import needed
     
-    @property
-    def price(self) -> float:
-        return self._price
-    
-    @price.setter
-    def price(self, value: float):
-        if not isinstance(value, float):
-            raise TypeError("Price must be a float")
-        if not 1.0 <= value <= 10.0:
-            raise ValueError("Price must be between 1.0 and 10.0")
-        if hasattr(self, '_price'):
-            raise AttributeError("Price cannot be changed after initialization")
-        self._price = value
+    def create_order(self, coffee, price):
+        from order import Order  # Local import
+        return Order(self, coffee, price)
